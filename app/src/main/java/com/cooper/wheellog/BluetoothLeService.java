@@ -199,14 +199,13 @@ public class BluetoothLeService extends Service {
                 if (!disconnectRequested &&
                         mBluetoothGatt != null && mBluetoothGatt.getDevice() != null) {
                     Timber.i("Trying to reconnect");
-                    if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.INMOTION) {
-                                InMotionAdapter.getInstance().stopTimer();
-                        }
-                    if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.NINEBOT_Z) {
-                        NinebotZAdapter.getInstance().resetConnection();
-                    }
-                    if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.NINEBOT) {
-                        NinebotAdapter.getInstance().resetConnection();
+                    IWheelAdapter adapter = WheelData.getInstance().getAdapter();
+                    if (adapter instanceof InMotionAdapter) {
+                        ((InMotionAdapter) adapter).stopTimer();
+                    } else if (adapter instanceof NinebotZAdapter) {
+                        ((NinebotZAdapter) adapter).resetConnection();
+                    } else if (adapter instanceof NinebotAdapter) {
+                        ((NinebotAdapter) adapter).resetConnection();
                     }
                     if (!autoConnect) {
                         autoConnect = true;
@@ -270,40 +269,46 @@ public class BluetoothLeService extends Service {
         }
     };
 
+    void decodeResponse(byte[] data) {
+        StringBuilder stringBuilder = new StringBuilder(data.length);
+        for (byte aData : data)
+            stringBuilder.append(String.format(Locale.US, "%02X", aData));
+        Timber.i("Received: " + stringBuilder.toString());
+        WheelData wd = WheelData.getInstance();
+        IWheelAdapter adapter = wd.getAdapter();
+        Timber.i("%s decoding", adapter.getClass().getSimpleName());
+        if (wd.getRideStartTime() == 0) {
+            wd.setRideStartTime(Calendar.getInstance().getTimeInMillis());
+            wd.setRidingTime(0);
+        }
+        boolean success = adapter.decode(data);
+        if (!success)
+            return;
+
+        int currentTime = (int) (Calendar.getInstance().getTimeInMillis() - wd.getRideStartTime()) / 1000;
+        wd.setCurrentTime(currentTime);
+        wd.setTopSpeed(wd.getSpeed());
+        wd.setVoltageSag(wd.getVoltage());
+
+        wd.updateGraph(getApplicationContext());
+    }
+
+    boolean uuidIsCorrect(String uuid)
+    {
+        switch (WheelData.getInstance().getWheelType())
+        {
+            case KINGSONG: return uuid.equals(Constants.KINGSONG_READ_CHARACTER_UUID);
+            case GOTWAY: return true;
+            case INMOTION: return uuid.equals(Constants.INMOTION_READ_CHARACTER_UUID);
+            case NINEBOT: return  uuid.equals(Constants.NINEBOT_Z_READ_CHARACTER_UUID);
+            case NINEBOT_Z: return uuid.equals(Constants.NINEBOT_READ_CHARACTER_UUID);
+        }
+        return false;
+    }
+
     private void readData(BluetoothGattCharacteristic characteristic, int status) {
-        if (status == BluetoothGatt.GATT_SUCCESS) {
-            if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.KINGSONG) {
-                if (characteristic.getUuid().toString().equals(Constants.KINGSONG_READ_CHARACTER_UUID)) {
-                    byte[] value = characteristic.getValue();
-                    WheelData.getInstance().decodeResponse(value, getApplicationContext());
-                }
-            }
-
-            if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.GOTWAY) {
-                byte[] value = characteristic.getValue();
-                WheelData.getInstance().decodeResponse(value, getApplicationContext());
-            }
-
-            if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.INMOTION) {
-                byte[] value = characteristic.getValue();
-                if (characteristic.getUuid().toString().equals(Constants.INMOTION_READ_CHARACTER_UUID)) {
-                    WheelData.getInstance().decodeResponse(value, getApplicationContext());
-                }
-            }
-
-            if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.NINEBOT_Z) {
-                byte[] value = characteristic.getValue();
-                if (characteristic.getUuid().toString().equals(Constants.NINEBOT_Z_READ_CHARACTER_UUID)) {
-                    WheelData.getInstance().decodeResponse(value, getApplicationContext());
-                }
-            }
-            if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.NINEBOT) {
-                byte[] value = characteristic.getValue();
-                if (characteristic.getUuid().toString().equals(Constants.NINEBOT_READ_CHARACTER_UUID)) {
-                    WheelData.getInstance().decodeResponse(value, getApplicationContext());
-                }
-            }
-
+        if (status == BluetoothGatt.GATT_SUCCESS && uuidIsCorrect(characteristic.getUuid().toString())) {
+            decodeResponse(characteristic.getValue());
         }
     }
 
@@ -337,10 +342,6 @@ public class BluetoothLeService extends Service {
         registerReceiver(messageReceiver, makeIntentFilter());
         startForeground(Constants.MAIN_NOTIFICATION_ID, mNotificationHandler.buildNotification());
         mgr = (PowerManager)this.getSystemService(Context.POWER_SERVICE);
-
-
-        //startBeepTimer(); //<<<<<<<<<<<<<<<<<
-
         return START_STICKY;
     }
 
@@ -460,21 +461,6 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt.close();
         mBluetoothGatt = null;
     }
-
-//    /**
-//     * Request a read on a given {@code BluetoothGattCharacteristic}. The read result is reported
-//     * asynchronously through the {@code BluetoothGattCallback#onCharacteristicRead(android.bluetooth.BluetoothGatt, android.bluetooth.BluetoothGattCharacteristic, int)}
-//     * callback.
-//     *
-//     * @param characteristic The characteristic to read from.
-//     */
-//    public void readCharacteristic(BluetoothGattCharacteristic characteristic) {
-//        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-//            Timber.w(TAG, "BluetoothAdapter not initialized");
-//            return;
-//        }
-//        mBluetoothGatt.readCharacteristic(characteristic);
-//    }
 
 //    /**
 //     * Enables or disables notification on a give characteristic.

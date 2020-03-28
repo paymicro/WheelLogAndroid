@@ -1,18 +1,17 @@
 package com.cooper.wheellog.utils;
 
 import com.cooper.wheellog.BluetoothLeService;
+import com.cooper.wheellog.WheelData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 import timber.log.Timber;
 
-//import static com.cooper.wheellog.utils.InMotionAdapter.Model.*;
-
 /**
  * Created by cedric on 29/12/2016.
  */
-public class NinebotAdapter {
+public class NinebotAdapter implements IWheelAdapter {
     private static NinebotAdapter INSTANCE;
     private Timer keepAliveTimer;
 	private boolean settingCommandReady = false;
@@ -21,11 +20,11 @@ public class NinebotAdapter {
 	private static byte[] gamma = new byte[16];
     private static int stateCon = 0;
     private static byte protoVersion = 0;
-
+    private String protoVer = "";
 
     NinebotUnpacker unpacker = new NinebotUnpacker();
 
-    public void startKeepAliveTimer(final BluetoothLeService mBluetoothLeService, final String ninebotPassword, final String protoVer) {
+    public void startKeepAliveTimer(final BluetoothLeService mBluetoothLeService, final String ninebotPassword) {
         Timber.i("Ninebot timer starting");
         if (protoVer.compareTo("S2")==0) protoVersion = 1;
         if (protoVer.compareTo("Mini")==0) protoVersion = 2;
@@ -81,15 +80,53 @@ public class NinebotAdapter {
         gamma = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
         stopTimer();
 	}
-	
 
+    public boolean decode(byte[] data) {
+        ArrayList<Status> statuses = charUpdated(data);
+        if (statuses.size() < 1)
+            return false;
 
+        WheelData wd = WheelData.getInstance();
+        for (Status status : statuses) {
+            Timber.i(status.toString());
+            if (status instanceof serialNumberStatus) {
+                wd.setSerialNumber(((serialNumberStatus) status).getSerialNumber());
+                wd.setModel("Ninebot " + protoVer);
+            } else if (status instanceof NinebotAdapter.versionStatus) {
+                wd.setVersion(((versionStatus) status).getVersion());
+            } else {
+                wd.setSpeed(status.getSpeed());
+                wd.setVoltage(status.getVoltage());
+                wd.setBatteryPercent(status.getBatt());
+                wd.setCurrent(status.getCurrent());
+                wd.setTotalDistance(status.getDistance());
+                wd.setTemperature(status.getTemperature() * 10);
 
+                wd.setDistance(status.getDistance());
+            }
+        }
+        return true;
+    }
 
+    @Override
+    public void updatePedalsMode(int pedalsMode) {
 
+    }
 
+    @Override
+    public void updateLightMode(int lightMode) {
 
-	
+    }
+
+    @Override
+    public void updateMaxSpeed(int wheelMaxSpeed) {
+
+    }
+
+    public void setProtoVer(String ver) {
+        protoVer = ver;
+    }
+
     public static class Status {
 
         private final int speed;
@@ -271,8 +308,6 @@ public class NinebotAdapter {
                 }
             }
         }
-
-
 
         enum Comm {
             Read(0x01),

@@ -1,24 +1,23 @@
 package com.cooper.wheellog.utils;
 
 import com.cooper.wheellog.BluetoothLeService;
+import com.cooper.wheellog.WheelData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 import timber.log.Timber;
 
-//import static com.cooper.wheellog.utils.InMotionAdapter.Model.*;
-
 /**
  * Created by palachzzz on 08/2018.
  */
-public class NinebotZAdapter {
+public class NinebotZAdapter implements IWheelAdapter {
     private static NinebotZAdapter INSTANCE;
     private Timer keepAliveTimer;
-	private boolean settingCommandReady = false;
-	private static int updateStep = 0;
-	private byte[] settingCommand;
-	private static byte[] gamma = new byte[16];
+    private boolean settingCommandReady = false;
+    private static int updateStep = 0;
+    private byte[] settingCommand;
+    private static byte[] gamma = new byte[16];
     private static int stateCon = 0;
     private static boolean bmsMode = false;
     private static int mErrorCode = 0;
@@ -93,7 +92,7 @@ public class NinebotZAdapter {
                         } else updateStep = 39;
 
                     } else if (settingCommandReady) {
-    					if (mBluetoothLeService.writeBluetoothGattCharacteristic(settingCommand)) {
+                        if (mBluetoothLeService.writeBluetoothGattCharacteristic(settingCommand)) {
                             //needSlowData = true;
                             settingCommandReady = false;
                             Timber.i("Sent command message");
@@ -102,12 +101,12 @@ public class NinebotZAdapter {
                         if (!mBluetoothLeService.writeBluetoothGattCharacteristic(NinebotZAdapter.CANMessage.getLiveData().writeBuffer())) {
                             Timber.i("Unable to send keep-alive message");
                             updateStep = 39;
-    					} else {
+                        } else {
                             Timber.i("Sent keep-alive message");
-    					}
+                        }
                     }
 
-				}
+                }
                 updateStep += 1;
 
                 if ((updateStep == 5) && (stateCon > 3) && (stateCon < 10)) {
@@ -133,7 +132,7 @@ public class NinebotZAdapter {
     }
 
 
-	public void resetConnection() {
+    public void resetConnection() {
         stateCon = 0;
         updateStep = 0;
         gamma = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -144,12 +143,46 @@ public class NinebotZAdapter {
         bmsMode = mode;
     }
 
+    public boolean decode(byte[] data) {
+        ArrayList<Status> statuses = charUpdated(data);
+        if (statuses.size() < 1) return false;
 
+        WheelData wd = WheelData.getInstance();
+        for (Status status : statuses) {
+            Timber.i(status.toString());
+            if (status instanceof serialNumberStatus) {
+                wd.setSerialNumber(((serialNumberStatus) status).getSerialNumber());
+                wd.setModel("Ninebot Z");
+            } else if (status instanceof NinebotZAdapter.versionStatus) {
+                wd.setVersion(((NinebotZAdapter.versionStatus) status).getVersion());
+            } else {
+                wd.setSpeed(status.getSpeed());
+                wd.setVoltage(status.getVoltage());
+                wd.setBatteryPercent(status.getBatt());
+                wd.setCurrent(status.getCurrent());
+                wd.setTotalDistance(status.getDistance());
+                wd.setTemperature(status.getTemperature() * 10);
+                wd.setDistance(status.getDistance());
+            }
+        }
+        return true;
+    }
 
+    @Override
+    public void updatePedalsMode(int pedalsMode) {
 
+    }
 
+    @Override
+    public void updateLightMode(int lightMode) {
 
-	
+    }
+
+    @Override
+    public void updateMaxSpeed(int wheelMaxSpeed) {
+
+    }
+
     public static class Status {
 
         private final int speed;
@@ -211,7 +244,7 @@ public class NinebotZAdapter {
             return distance;
         }
 
-		public int getTemperature() {
+        public int getTemperature() {
             return temperature;
         }
 
@@ -236,7 +269,6 @@ public class NinebotZAdapter {
                     '}';
         }
     }
-	
 
     public static class serialNumberStatus extends Status {
         private final String serialNumber;
@@ -244,11 +276,11 @@ public class NinebotZAdapter {
         serialNumberStatus(String serialNumber) {
             super();
             this.serialNumber = serialNumber;
-      }
+        }
 
-      public String getSerialNumber() {
+        public String getSerialNumber() {
             return serialNumber;
-      }
+        }
 
 
         @Override
@@ -541,7 +573,6 @@ public class NinebotZAdapter {
         }
     }
 
-
     public static class activationStatus extends Status {
         private final String activationDate;
 
@@ -562,7 +593,7 @@ public class NinebotZAdapter {
         }
     }
 
-    private static String toHexString(byte[] buffer){
+    private static String toHexString(byte[] buffer) {
         String str = "[";
 
         for (int c : buffer) {
@@ -571,6 +602,7 @@ public class NinebotZAdapter {
         str += "]";
         return str;
     }
+
     /**
      * Created by cedric on 29/12/2016.
      */
@@ -621,7 +653,6 @@ public class NinebotZAdapter {
             ActivationDate(0x69),
             LiveData(0xb0);
 
-
             private int value;
 
             Param(int value) {
@@ -649,8 +680,8 @@ public class NinebotZAdapter {
             destination = bArr[2] & 0xff;
             command = bArr[3] & 0xff;
             parameter = bArr[4] & 0xff;
-            data = Arrays.copyOfRange(bArr, 5, bArr.length-2);
-            crc = bArr[bArr.length-1] << 8 + bArr[bArr.length-2];
+            data = Arrays.copyOfRange(bArr, 5, bArr.length - 2);
+            crc = bArr[bArr.length - 1] << 8 + bArr[bArr.length - 2];
 
         }
 
@@ -691,8 +722,8 @@ public class NinebotZAdapter {
                 e.printStackTrace();
             }
             crc = computeCheck(buff.toByteArray());
-            buff.write(crc&0xff);
-            buff.write((crc>>8)&0xff);
+            buff.write(crc & 0xff);
+            buff.write((crc >> 8) & 0xff);
             byte[] cryptedBuffer = crypto(buff.toByteArray());
             return cryptedBuffer;
         }
@@ -705,57 +736,43 @@ public class NinebotZAdapter {
 
             int check = 0;
             for (byte c : buffer) {
-                check = check + ((int)c & 0xff);
-				//check = (check + (int) c) % 256;
+                check = check + ((int) c & 0xff);
+                //check = (check + (int) c) % 256;
             }
             check ^= 0xFFFF;
             check &= 0xFFFF;
 
             return check;
         }
-/////////////// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< fix ME
+
+        // TODO: fix ME
         static CANMessage verify(byte[] buffer) {
 
             Timber.i("Verifying");
             byte[] dataBuffer = Arrays.copyOfRange(buffer, 2, buffer.length);
             dataBuffer = crypto(dataBuffer);
 
-            int check = (dataBuffer[dataBuffer.length-1]<<8 | ((dataBuffer[dataBuffer.length-2]) & 0xff)) & 0xffff;
-            byte [] dataBufferCheck = Arrays.copyOfRange(dataBuffer, 0, dataBuffer.length-2);
+            int check = (dataBuffer[dataBuffer.length - 1] << 8 | ((dataBuffer[dataBuffer.length - 2]) & 0xff)) & 0xffff;
+            byte[] dataBufferCheck = Arrays.copyOfRange(dataBuffer, 0, dataBuffer.length - 2);
             int checkBuffer = computeCheck(dataBufferCheck);
             if (check == checkBuffer) {
                 Timber.i("Check OK");
             } else {
-                Timber.i("Check FALSE, packet: %02X, calc: %02X",check, checkBuffer);
+                Timber.i("Check FALSE, packet: %02X, calc: %02X", check, checkBuffer);
             }
             return (check == checkBuffer) ? new CANMessage(dataBuffer) : null;
-
-            //return new CANMessage(dataBuffer);
-
         }
 
         static byte[] crypto(byte[] buffer) {
 
             byte[] dataBuffer = Arrays.copyOfRange(buffer, 0, buffer.length);
-            //String crypto_text = "";
-            //for (int j = 0; j < dataBuffer.length; j++) {
-            //    crypto_text += String.format("%02X", dataBuffer[j]);
-            //}
-            //Timber.i("Initial packet: %s", crypto_text);
             Timber.i("Initial packet: %s", toHexString(dataBuffer));
             for (int j = 1; j < dataBuffer.length; j++) {
-                dataBuffer[j] ^= gamma[(j-1)%16];
+                dataBuffer[j] ^= gamma[(j - 1) % 16];
             }
-            //crypto_text = "";
-            //for (int j = 0; j < dataBuffer.length; j++) {
-            //    crypto_text += String.format("%02X", dataBuffer[j]);
-            //}
-            //Timber.i("Decrypted packet: %s", crypto_text);
             Timber.i("En/Decrypted packet: %s", toHexString(dataBuffer));
 
-
             return dataBuffer;
-
         }
 
         private int intFromBytes(byte[] bytes, int starting) {
@@ -925,7 +942,7 @@ public class NinebotZAdapter {
 
 
         private byte[] parseKey() {
-            byte [] gammaTemp = Arrays.copyOfRange(data, 0, data.length);
+            byte[] gammaTemp = Arrays.copyOfRange(data, 0, data.length);
             String gamma_text = "";
             for (int j = 0; j < data.length; j++) {
                 gamma_text += String.format("%02X", data[j]);
@@ -935,11 +952,7 @@ public class NinebotZAdapter {
         }
 
         serialNumberStatus parseSerialNumber() {
-            String serialNumber = new String (data);//"";
-            /*
-            for (int j = 0; j < data.length; j++) {
-                serialNumber += String.format("%02X", data[j]);
-            }*/
+            String serialNumber = new String(data);//"";
             return new serialNumberStatus(serialNumber);
         }
 
@@ -957,10 +970,10 @@ public class NinebotZAdapter {
         activationStatus parseActivationDate() {
 
             int activationDate = this.shortFromBytes(data, 0);
-            int year = activationDate>>9;
-            int mounth = (activationDate>>5) & 0x0f;
+            int year = activationDate >> 9;
+            int mounth = (activationDate >> 5) & 0x0f;
             int day = activationDate & 0x1f;
-            String activationDateStr = String.format("%02d.%02d.20%02d", day, mounth,year);
+            String activationDateStr = String.format("%02d.%02d.20%02d", day, mounth, year);
             return new activationStatus(activationDateStr);
         }
 
@@ -970,8 +983,8 @@ public class NinebotZAdapter {
             int escstatus = this.shortFromBytes(data, 4);
             int batt = this.shortFromBytes(data, 8);
             int speed = this.shortFromBytes(data, 10);
-            int distance = this.intFromBytes(data,14);
-            int temperature = this.shortFromBytes(data,22);
+            int distance = this.intFromBytes(data, 14);
+            int temperature = this.shortFromBytes(data, 22);
             int voltage = this.shortFromBytes(data, 24);
             int current = this.signedShortFromBytes(data, 26);
             int power = voltage*current;
@@ -1071,7 +1084,6 @@ public class NinebotZAdapter {
                 }
 
                 str += String.format("%02X", (c & 0xFF));
-                //comma = true;
             }
 
             str += "]";
@@ -1175,7 +1187,7 @@ public class NinebotZAdapter {
                         }
                     }
 
-                } 
+                }
             }
         }
         return outValues;
@@ -1207,7 +1219,7 @@ public class NinebotZAdapter {
                 case collecting:
 
                     buffer.write(c);
-                    if (buffer.size() == len+9) {
+                    if (buffer.size() == len + 9) {
                         state = UnpackerState.done;
                         updateStep = 0;
                         Timber.i("Len %d", len);
@@ -1273,5 +1285,4 @@ public class NinebotZAdapter {
         Timber.i("Kill instance, stop timer");
         INSTANCE = null;
     }
-
 }
