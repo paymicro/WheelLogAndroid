@@ -239,7 +239,7 @@ public class WheelData {
     }
 
 
-    static void initiate() {
+    public static void initiate() {
         if (mInstance == null)
             mInstance = new WheelData();
 		else {
@@ -324,8 +324,8 @@ public class WheelData {
         return mInstance;
     }
 
-    int getSpeed() {
-        return mSpeed / 10;
+    public int getSpeed() {
+        return (int)Math.round(mSpeed / 10.0);
     }
 	
 	boolean getWheelLight() {

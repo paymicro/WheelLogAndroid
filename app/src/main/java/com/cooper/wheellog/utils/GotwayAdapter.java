@@ -45,7 +45,7 @@ public class GotwayAdapter implements IWheelAdapter {
                 wd.setSpeed(speed);
             }
 
-            int temperature = (int) Math.round(((((data[12] * 256) + data[13]) / 340.0) + 35) * 100);
+            int temperature = (int) Math.round((MathsUtil.byteArrayInt2(data[13], data[12]) - 32) / 1.8 * 100);
             wd.setTemperature(temperature);
             wd.setTemperature2(temperature);
 
