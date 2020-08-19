@@ -24,3 +24,5 @@ jobs:
       run: chmod +x gradlew
     - name: Build
       run: ./gradlew build
+    - name: Android Build
+      uses: vgaidarji/android-github-actions-build@v1.0.1
