@@ -68,7 +68,7 @@ class GotwayAdapterTest {
         // Assert.
         assertThat(result).isTrue()
         var speedInKm = round(speed * 3.6 / 10).toInt();
-        assertThat(data.speed).isEqualTo(speedInKm)
+        assertThat(abs(data.speed)).isEqualTo(speedInKm)
         var tempInCelcius = round(((temperature - 32) * 5.0 / 9.0)).toInt();
         assertThat(data.temperature).isEqualTo(tempInCelcius)
         assertThat(data.temperature2).isEqualTo(tempInCelcius)
