@@ -239,7 +239,7 @@ public class WheelData {
     }
 
 
-    public static void initiate() {
+    static void initiate() {
         if (mInstance == null)
             mInstance = new WheelData();
 		else {

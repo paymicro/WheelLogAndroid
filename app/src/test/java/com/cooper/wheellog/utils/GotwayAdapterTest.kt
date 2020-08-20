@@ -14,15 +14,18 @@ class GotwayAdapterTest {
 
     private var adapter: GotwayAdapter = GotwayAdapter()
     private var header = byteArrayOf(0x55, 0xAA.toByte())
+    private var data = spyk(WheelData())
 
     @Before
-    @Throws(Exception::class)
     fun setUp() {
+        data = spyk(WheelData())
+        mockkStatic(WheelData::class)
+        every { WheelData.getInstance() } returns data
     }
 
     @After
-    @Throws(Exception::class)
     fun tearDown() {
+        unmockkAll()
     }
 
     @Test
@@ -43,8 +46,6 @@ class GotwayAdapterTest {
     @Test
     fun `decode with normal data`() {
         // Arrange.
-        WheelData.initiate()
-        var data = WheelData.getInstance()
         var voltage = 6000.toShort()
         var voltageBytes = ByteBuffer.allocate(2).putShort(voltage).array()
         var speed = 111.toShort()
@@ -75,5 +76,24 @@ class GotwayAdapterTest {
         assertThat(data.wheelDistanceDouble).isEqualTo(distance / 1000.0)
         assertThat(data.voltage).isEqualTo(voltage)
         assertThat(data.batteryLevel).isEqualTo(54)
+    }
+
+    @Test
+    fun `update pedals mode`() {
+        // Arrange.
+        every { data.bluetoothLeService.writeBluetoothGattCharacteristic(any()) } returns true
+        mockkConstructor(android.os.Handler::class)
+        every { anyConstructed<android.os.Handler>().postDelayed(any(), any()) } returns true
+
+        // Act.
+        adapter.updatePedalsMode(0)
+        adapter.updatePedalsMode(1)
+        adapter.updatePedalsMode(2)
+
+        // Assert.
+        verify { anyConstructed<android.os.Handler>().postDelayed(any(), any()) }
+        verify { data.bluetoothLeService.writeBluetoothGattCharacteristic("h".toByteArray()) }
+        verify { data.bluetoothLeService.writeBluetoothGattCharacteristic("f".toByteArray()) }
+        verify { data.bluetoothLeService.writeBluetoothGattCharacteristic("s".toByteArray()) }
     }
 }
