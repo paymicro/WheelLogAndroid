@@ -152,7 +152,8 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
 				int led_mode = Integer.parseInt(sharedPreferences.getString(getString(R.string.led_mode), "0"));
 				WheelData.getInstance().updateLedMode(led_mode);
 				break;
-            case "wheel_ks_alarm3":
+			// TODO move to specific KingsongAdapter
+            /*case "wheel_ks_alarm3":
                 final int alert3 = sharedPreferences.getInt("wheel_ks_alarm3", 0);
                 if (WheelData.getInstance().getAdapter() instanceof KingsongAdapter) {
                     ((KingsongAdapter)WheelData.getInstance().getAdapter()).updateKSAlarm3(alert3);
@@ -169,7 +170,20 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
                 if (WheelData.getInstance().getAdapter() instanceof KingsongAdapter) {
                     ((KingsongAdapter)WheelData.getInstance().getAdapter()).updateKSAlarm1(alert1);
                 }
+                break;*/
+            case "wheel_ks_alarm3":
+                final int alert3 = sharedPreferences.getInt("wheel_ks_alarm3", 0);
+                WheelData.getInstance().updateKSAlarm3(alert3);
                 break;
+            case "wheel_ks_alarm2":
+                final int alert2 = sharedPreferences.getInt("wheel_ks_alarm2", 0);
+                WheelData.getInstance().updateKSAlarm2(alert2);
+                break;
+            case "wheel_ks_alarm1":
+                final int alert1 = sharedPreferences.getInt("wheel_ks_alarm1", 0);
+                WheelData.getInstance().updateKSAlarm1(alert1);
+                break;
+            //end todo
         }
         context.sendBroadcast(new Intent(Constants.ACTION_PREFERENCE_CHANGED));
     }
@@ -266,7 +280,7 @@ public class MainPreferencesFragment extends PreferenceFragmentCompat implements
 							if (mWheelType == WHEEL_TYPE.KINGSONG) {
 							    addPreferencesFromResource(R.xml.preferences_kingsong);
 							    KingsongAdapter adapter = (KingsongAdapter) WheelData.getInstance().getAdapter();
-							    if (adapter.isPrefReceived()) {
+							    if (WheelData.getInstance().isPrefReceived()) {
                                     correctWheelBarState(getString(R.string.wheel_max_speed), WheelData.getInstance().getWheelMaxSpeed());
                                     correctWheelBarState(getString(R.string.wheel_ks_alarm1), adapter.getKSAlarm1Speed());
                                     correctWheelBarState(getString(R.string.wheel_ks_alarm2), adapter.getKSAlarm2Speed());

@@ -275,15 +275,33 @@ public class BluetoothLeService extends Service {
             stringBuilder.append(String.format(Locale.US, "%02X", aData));
         Timber.i("Received: " + stringBuilder.toString());
         WheelData wd = WheelData.getInstance();
+
         IWheelAdapter adapter = wd.getAdapter();
         Timber.i("%s decoding", adapter.getClass().getSimpleName());
         if (wd.getRideStartTime() == 0) {
             wd.setRideStartTime(Calendar.getInstance().getTimeInMillis());
             wd.setRidingTime(0);
         }
-        boolean success = adapter.decode(data);
+        // TODO return decode from specific adapter
+        /*boolean success = adapter.decode(data);
         if (!success)
-            return;
+            return;*/
+        if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.KINGSONG) {
+            WheelData.getInstance().decodeResponse(data, getApplicationContext());
+        }
+        if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.GOTWAY) {
+            WheelData.getInstance().decodeResponse(data, getApplicationContext());
+        }
+        if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.INMOTION) {
+            WheelData.getInstance().decodeResponse(data, getApplicationContext());
+        }
+        if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.NINEBOT_Z) {
+            WheelData.getInstance().decodeResponse(data, getApplicationContext());
+        }
+        if (WheelData.getInstance().getWheelType() == WHEEL_TYPE.NINEBOT) {
+            WheelData.getInstance().decodeResponse(data, getApplicationContext());
+        }
+        // end todo
 
         int currentTime = (int) (Calendar.getInstance().getTimeInMillis() - wd.getRideStartTime()) / 1000;
         wd.setCurrentTime(currentTime);
