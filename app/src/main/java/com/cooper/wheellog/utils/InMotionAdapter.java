@@ -1,7 +1,6 @@
 package com.cooper.wheellog.utils;
 
 import com.cooper.wheellog.BluetoothLeService;
-import com.cooper.wheellog.WheelData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -9,12 +8,11 @@ import java.util.*;
 import timber.log.Timber;
 
 import static com.cooper.wheellog.utils.InMotionAdapter.Model.*;
-import static com.cooper.wheellog.utils.MathsUtil.*;
 
 /**
  * Created by cedric on 29/12/2016.
  */
-public class InMotionAdapter implements IWheelAdapter {
+public class InMotionAdapter {
     private static InMotionAdapter INSTANCE;
     private Timer keepAliveTimer;
     private boolean passwordSent = false;
@@ -27,64 +25,6 @@ public class InMotionAdapter implements IWheelAdapter {
     public static void setBetterPercents (boolean betterPercents) {
         mBetterPercents = betterPercents;
     }
-
-    public boolean decode(byte[] data) {
-        ArrayList<Status> statuses = charUpdated(data);
-        if (statuses.size() < 1)
-            return false;
-
-        WheelData wd = WheelData.getInstance();
-
-        for (Status status: statuses) {
-            Timber.i(status.toString());
-            if (status instanceof Infos) {
-                Infos info = (Infos) status;
-                wd.setWheelLight(info.getLightState());
-                wd.setLed(info.getLedState());
-                wd.setButtonDisabled(info.getHandleButtonState());
-                wd.setMaxSpeed(info.getMaxSpeedState());
-                wd.setSpeakerVolume(info.getSpeakerVolumeState());
-                wd.setTiltHorizon(info.getTiltHorizon());
-                wd.setSerialNumber(info.getSerialNumber());
-                wd.setModel(info.getModelString());
-                wd.setVersion(info.getVersion());
-                wd.setNewSettings(true);
-            } else if (status instanceof Alert) {
-                wd.addAlert(((Alert) status).getfullText());
-            } else {
-                wd.setSpeed((int) (status.getSpeed() * 360d));
-                wd.setVoltage((int) (status.getVoltage() * 100d));
-                wd.setCurrent((int) (status.getCurrent() * 100d));
-                wd.setTemperature((int) (status.getTemperature() * 100d));
-                wd.setTemperature2((int) (status.getTemperature2() * 100d));
-                wd.setTotalDistance((long) (status.getDistance() * 1000d));
-                wd.setAngle((double) (status.getAngle()));
-                wd.setRoll((double) (status.getRoll()));
-
-                wd.setModeStr(status.getWorkModeString());
-                wd.setBatteryPercent((int) status.getBatt());
-                wd.setDistance((long) status.getDistance());
-            }
-        }
-        return true;
-    }
-
-    @Override
-    public void updatePedalsMode(int pedalsMode) {
-    }
-
-    @Override
-    public void updateLightMode(int lightMode) {
-    }
-
-    @Override
-    public void updateMaxSpeed(int wheelMaxSpeed) {
-        if (WheelData.getInstance().getWheelMaxSpeed() != wheelMaxSpeed) {
-            WheelData.getInstance().setWheelMaxSpeed(wheelMaxSpeed);
-            setMaxSpeedState(wheelMaxSpeed);
-        }
-    }
-
     enum Mode {
         rookie(0),
         general(1),
@@ -104,6 +44,7 @@ public class InMotionAdapter implements IWheelAdapter {
         }
 
     }
+
 
     public enum Model {
 
@@ -185,6 +126,7 @@ public class InMotionAdapter implements IWheelAdapter {
         }
     }
 
+
     enum WorkMode {
         idle(0),
         drive(1),
@@ -245,6 +187,7 @@ public class InMotionAdapter implements IWheelAdapter {
                             Timber.i("Sent keep-alive message");
     					}
                     }
+
 				}
                 updateStep += 1;
                 updateStep %= 40;
@@ -255,6 +198,7 @@ public class InMotionAdapter implements IWheelAdapter {
         keepAliveTimer.scheduleAtFixedRate(timerTask, 0, 25);
     }
 	
+
 	public void resetConnection() {
 		passwordSent = false;
 	}
@@ -265,28 +209,24 @@ public class InMotionAdapter implements IWheelAdapter {
 		//mBluetoothLeService.writeBluetoothGattCharacteristic(InMotionAdapter.CANMessage.setLight(lightEnable).writeBuffer());
 		settingCommand = InMotionAdapter.CANMessage.setLight(lightEnable).writeBuffer();
 	}
-
 	public void setLedState(final boolean ledEnable) {
 		settingCommandReady = true;
 		//needSlowData = true;
 		//mBluetoothLeService.writeBluetoothGattCharacteristic(InMotionAdapter.CANMessage.setLed(ledEnable).writeBuffer());
 		settingCommand = InMotionAdapter.CANMessage.setLed(ledEnable).writeBuffer();
 	}
-
 	public void setHandleButtonState(final boolean handleButtonEnable) {
 		settingCommandReady = true;
 		//needSlowData = true;
 		//mBluetoothLeService.writeBluetoothGattCharacteristic(InMotionAdapter.CANMessage.setHandleButton(handleButtonEnable).writeBuffer());
 		settingCommand = InMotionAdapter.CANMessage.setHandleButton(handleButtonEnable).writeBuffer();
 	}
-
 	public void setMaxSpeedState(final int maxSpeed) {
 		settingCommandReady = true;
 		//needSlowData = true;
 		//mBluetoothLeService.writeBluetoothGattCharacteristic(InMotionAdapter.CANMessage.setMaxSpeed(maxSpeed).writeBuffer());
 		settingCommand = InMotionAdapter.CANMessage.setMaxSpeed(maxSpeed).writeBuffer();
 	}
-
 	public void setSpeakerVolumeState(final int speakerVolume) {
 		settingCommandReady = true;
 		//needSlowData = true;
@@ -314,6 +254,7 @@ public class InMotionAdapter implements IWheelAdapter {
         }
     }
 
+
     static Mode intToModeWithL6(int mode) {
         if ((mode & 15) != 0) {
             return Mode.bldc;
@@ -329,6 +270,7 @@ public class InMotionAdapter implements IWheelAdapter {
             return WorkMode.unlock;
         }
     }
+
 
     static WorkMode intToWorkMode(int mode) {
 
@@ -803,7 +745,7 @@ public class InMotionAdapter implements IWheelAdapter {
             type = bArr[15] == 0 ? CanFrame.DataFrame.getValue() : CanFrame.RemoteFrame.getValue();
 
             if (len == (byte) 0xFE) {
-                int ldata = intFromBytes(data, 0);
+                int ldata = this.intFromBytes(data, 0);
 
                 if (ldata == bArr.length - 16) {
                     ex_data = Arrays.copyOfRange(bArr, 16, 16 + ldata);
@@ -887,6 +829,35 @@ public class InMotionAdapter implements IWheelAdapter {
             }
             return (byte) check;
         }
+
+        private int intFromBytes(byte[] bytes, int starting) {
+            if (bytes.length >= starting + 4) {
+                return (((((((bytes[starting + 3] & 255)) << 8) | (bytes[starting + 2] & 255)) << 8) | (bytes[starting + 1] & 255)) << 8) | (bytes[starting] & 255);
+            }
+            return 0;
+        }
+
+        private long longFromBytes(byte[] bytes, int starting) {
+            if (bytes.length >= starting + 8) {
+                return ((((((((((((((((long) (bytes[starting + 7] & 255))) << 8) | ((long) (bytes[starting + 6] & 255))) << 8) | ((long) (bytes[starting + 5] & 255))) << 8) | ((long) (bytes[starting + 4] & 255))) << 8) | ((long) (bytes[starting + 3] & 255))) << 8) | ((long) (bytes[starting + 2] & 255))) << 8) | ((long) (bytes[starting + 1] & 255))) << 8) | ((long) (bytes[starting] & 255));
+            }
+            return 0;
+        }
+
+        long signedIntFromBytes(byte[] bytes, int starting) {
+            if (bytes.length >= starting + 4) {
+                return (((((((bytes[starting + 3] & 255)) << 8) | (bytes[starting + 2] & 255)) << 8) | (bytes[starting + 1] & 255)) << 8) | (bytes[starting] & 255);
+            }
+            return 0;
+        }
+
+        public static short shortFromBytes(byte[] bytes, int starting) {
+            if (bytes.length >= starting + 2) {
+                return (short) (((short) (((short) ((bytes[starting + 1] & 255))) << 8)) | (bytes[starting] & 255));
+            }
+            return (short) 0;
+        }
+
 
         static CANMessage verify(byte[] buffer) {
 
@@ -991,7 +962,10 @@ public class InMotionAdapter implements IWheelAdapter {
 		
 		public static CANMessage setLed(boolean on) {
             CANMessage msg = new CANMessage();
-			byte enable = (byte) (on ? 0x10 : 0x0F);
+			byte enable = 0x10;
+			if (on) {
+				enable = 0x0F;
+			}
 		    msg.len = 8;
             msg.id = IDValue.Led.getValue();
             msg.ch = 5;
@@ -1122,14 +1096,14 @@ public class InMotionAdapter implements IWheelAdapter {
 
         Status parseFastInfoMessage(Model model) {
             if (ex_data == null) return null;
-            double angle = (double) (intFromBytes(ex_data, 0)) / 65536.0;
-			double roll = (double) (intFromBytes(ex_data, 72)) / 90.0;
-            double speed = ((double) (signedIntFromBytes(ex_data, 12)) + (double) (signedIntFromBytes(ex_data, 16))) / (model.getSpeedCalculationFactor() * 2.0);
+            double angle = (double) (this.intFromBytes(ex_data, 0)) / 65536.0;
+			double roll = (double) (this.intFromBytes(ex_data, 72)) / 90.0;
+            double speed = ((double) (this.signedIntFromBytes(ex_data, 12)) + (double) (this.signedIntFromBytes(ex_data, 16))) / (model.getSpeedCalculationFactor() * 2.0);
             //if (model == R1S || model == R1Sample || model == R0 || model == V8) {
             speed = Math.abs(speed);
             //}
-            double voltage = (double) (intFromBytes(ex_data, 24)) / 100.0;
-            double current = (double) (signedIntFromBytes(ex_data, 20)) / 100.0;
+            double voltage = (double) (this.intFromBytes(ex_data, 24)) / 100.0;
+            double current = (double) (this.signedIntFromBytes(ex_data, 20)) / 100.0;
 			double temperature = ex_data[32] & 0xff;
 			double temperature2 = ex_data[34] & 0xff;
             double batt = batteryFromVoltage(voltage, model);
@@ -1139,17 +1113,17 @@ public class InMotionAdapter implements IWheelAdapter {
 
             if (model.belongToInputType( "1") || model.belongToInputType( "5") ||
                     model == V8 || model == Glide3 || model == V10 || model == V10F || model == V10_test || model == V10F_test) {
-                distance = (double) (intFromBytes(ex_data, 44)) / 1000.0d; ///// V10F 48 byte - trip distance
+                distance = (double) (this.intFromBytes(ex_data, 44)) / 1000.0d; ///// V10F 48 byte - trip distance
             } else if (model == R0) {
-                distance = (double) (longFromBytes(ex_data, 44)) / 1000.0d;
+                distance = (double) (this.longFromBytes(ex_data, 44)) / 1000.0d;
 
             } else if (model == L6) {
-                distance = (double) (longFromBytes(ex_data, 44)) / 10.0;
+                distance = (double) (this.longFromBytes(ex_data, 44)) / 10.0;
 
             } else {
-                distance = (double) (longFromBytes(ex_data, 44)) / 5.711016379455429E7d;
+                distance = (double) (this.longFromBytes(ex_data, 44)) / 5.711016379455429E7d;
             }
-			int workModeInt = intFromBytes(ex_data, 60)&0xF;
+			int workModeInt = this.intFromBytes(ex_data, 60)&0xF;
             WorkMode workMode = intToWorkMode(workModeInt);
             double lock = 0.0;
             switch (workMode) {
@@ -1227,7 +1201,7 @@ public class InMotionAdapter implements IWheelAdapter {
 			boolean light = false;
 			boolean led = false;
 			boolean handlebutton = false;
-			int pedals = (int)(Math.round((intFromBytes(ex_data, 56)) / 6553.6));
+			int pedals = (int)(Math.round((this.intFromBytes(ex_data, 56)) / 6553.6));
 			maxspeed = (((ex_data[61]&0xFF)*256) | (ex_data[60]&0xFF))/1000;
 			light = (ex_data[80] == 1) ? true : false;
 			if (ex_data.length > 126) {
@@ -1386,4 +1360,5 @@ public class InMotionAdapter implements IWheelAdapter {
         Timber.i("Kill instance, stop timer");
         INSTANCE = null;
     }
+
 }

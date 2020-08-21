@@ -40,9 +40,6 @@ import androidx.viewpager.widget.ViewPager;
 import com.cooper.wheellog.utils.Constants;
 import com.cooper.wheellog.utils.Constants.ALARM_TYPE;
 import com.cooper.wheellog.utils.Constants.WHEEL_TYPE;
-import com.cooper.wheellog.utils.GotwayAdapter;
-import com.cooper.wheellog.utils.IWheelAdapter;
-import com.cooper.wheellog.utils.KingsongAdapter;
 import com.cooper.wheellog.utils.SettingsUtil;
 import com.cooper.wheellog.utils.Typefaces;
 import com.cooper.wheellog.views.WheelView;
@@ -1033,41 +1030,40 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void updateScreen(boolean updateGraph) {
-        WheelData data = WheelData.getInstance();
         switch (viewPagerPage) {
             case 0: // GUI View
-                data.setBmsView(false);
-                wheelView.setSpeed(data.getSpeed());
-                wheelView.setBattery(data.getBatteryLevel());
-                wheelView.setTemperature(data.getTemperature());
-                wheelView.setRideTime(data.getRidingTimeString());
-                wheelView.setTopSpeed(data.getTopSpeedDouble());
-                wheelView.setDistance(data.getDistanceDouble());
-                wheelView.setTotalDistance(data.getTotalDistanceDouble());
-                wheelView.setVoltage(data.getVoltageDouble());
-                wheelView.setCurrent(data.getPowerDouble());
-                wheelView.setAverageSpeed(data.getAverageRidingSpeedDouble());
+                WheelData.getInstance().setBmsView(false);
+                wheelView.setSpeed(WheelData.getInstance().getSpeed());
+                wheelView.setBattery(WheelData.getInstance().getBatteryLevel());
+                wheelView.setTemperature(WheelData.getInstance().getTemperature());
+                wheelView.setRideTime(WheelData.getInstance().getRidingTimeString());
+                wheelView.setTopSpeed(WheelData.getInstance().getTopSpeedDouble());
+                wheelView.setDistance(WheelData.getInstance().getDistanceDouble());
+                wheelView.setTotalDistance(WheelData.getInstance().getTotalDistanceDouble());
+                wheelView.setVoltage(WheelData.getInstance().getVoltageDouble());
+                wheelView.setCurrent(WheelData.getInstance().getPowerDouble());
+                wheelView.setAverageSpeed(WheelData.getInstance().getAverageRidingSpeedDouble());
                 break;
             case 1: // Text View
-                data.setBmsView(false);
+                WheelData.getInstance().setBmsView(false);
                 if (use_mph) {
-                    tvSpeed.setText(String.format(Locale.US, "%.1f " + getString(use_mph ? R.string.mph : R.string.kmh), kmToMiles(data.getSpeedDouble())));
-                    tvTopSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.mph), kmToMiles(data.getTopSpeedDouble())));
-                    tvAverageSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.mph), kmToMiles(data.getAverageSpeedDouble())));
-                    tvAverageRidingSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.mph), kmToMiles(data.getAverageRidingSpeedDouble())));
-                    tvDistance.setText(String.format(Locale.US, "%.2f " + getString(R.string.milli), kmToMiles(data.getDistanceDouble())));
-                    tvWheelDistance.setText(String.format(Locale.US, "%.2f " + getString(R.string.milli), kmToMiles(data.getWheelDistanceDouble())));
-                    tvUserDistance.setText(String.format(Locale.US, "%.2f " + getString(R.string.milli), kmToMiles(data.getUserDistanceDouble())));
-                    tvTotalDistance.setText(String.format(Locale.US, "%.2f " + getString(R.string.milli), kmToMiles(data.getTotalDistanceDouble())));
+                    tvSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.mph), kmToMiles(WheelData.getInstance().getSpeedDouble())));
+                    tvTopSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.mph), kmToMiles(WheelData.getInstance().getTopSpeedDouble())));
+                    tvAverageSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.mph), kmToMiles(WheelData.getInstance().getAverageSpeedDouble())));
+                    tvAverageRidingSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.mph), kmToMiles(WheelData.getInstance().getAverageRidingSpeedDouble())));
+                    tvDistance.setText(String.format(Locale.US, "%.2f " + getString(R.string.milli), kmToMiles(WheelData.getInstance().getDistanceDouble())));
+                    tvWheelDistance.setText(String.format(Locale.US, "%.2f " + getString(R.string.milli), kmToMiles(WheelData.getInstance().getWheelDistanceDouble())));
+                    tvUserDistance.setText(String.format(Locale.US, "%.2f " + getString(R.string.milli), kmToMiles(WheelData.getInstance().getUserDistanceDouble())));
+                    tvTotalDistance.setText(String.format(Locale.US, "%.2f " + getString(R.string.milli), kmToMiles(WheelData.getInstance().getTotalDistanceDouble())));
                 } else {
-                    tvSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.kmh), data.getSpeedDouble()));
-                    tvTopSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.kmh), data.getTopSpeedDouble()));
-                    tvAverageSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.kmh), data.getAverageSpeedDouble()));
-                    tvAverageRidingSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.kmh), data.getAverageRidingSpeedDouble()));
-                    tvDistance.setText(String.format(Locale.US, "%.3f " + getString(R.string.km), data.getDistanceDouble()));
-                    tvWheelDistance.setText(String.format(Locale.US, "%.3f " + getString(R.string.km), data.getWheelDistanceDouble()));
-                    tvUserDistance.setText(String.format(Locale.US, "%.3f " + getString(R.string.km), data.getUserDistanceDouble()));
-                    tvTotalDistance.setText(String.format(Locale.US, "%.3f " + getString(R.string.km), data.getTotalDistanceDouble()));
+                    tvSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.kmh), WheelData.getInstance().getSpeedDouble()));
+                    tvTopSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.kmh), WheelData.getInstance().getTopSpeedDouble()));
+                    tvAverageSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.kmh), WheelData.getInstance().getAverageSpeedDouble()));
+                    tvAverageRidingSpeed.setText(String.format(Locale.US, "%.1f " + getString(R.string.kmh), WheelData.getInstance().getAverageRidingSpeedDouble()));
+                    tvDistance.setText(String.format(Locale.US, "%.3f " + getString(R.string.km), WheelData.getInstance().getDistanceDouble()));
+                    tvWheelDistance.setText(String.format(Locale.US, "%.3f " + getString(R.string.km), WheelData.getInstance().getWheelDistanceDouble()));
+                    tvUserDistance.setText(String.format(Locale.US, "%.3f " + getString(R.string.km), WheelData.getInstance().getUserDistanceDouble()));
+                    tvTotalDistance.setText(String.format(Locale.US, "%.3f " + getString(R.string.km), WheelData.getInstance().getTotalDistanceDouble()));
                 }
 
                 tvVoltage.setText(String.format(Locale.US, "%.2f " + getString(R.string.volt), WheelData.getInstance().getVoltageDouble()));
@@ -1089,9 +1085,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 tvMode.setText(WheelData.getInstance().getModeStr());
                 break;
             case 2: // Graph  View
-                data.setBmsView(false);
+                WheelData.getInstance().setBmsView(false);
                 if (updateGraph) {
-                    xAxis_labels = data.getXAxis();
+                    xAxis_labels = WheelData.getInstance().getXAxis();
 
                     if (xAxis_labels.size() > 0) {
 
@@ -1595,6 +1591,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onPause() {
         super.onPause();
         unregisterReceiver(mBluetoothUpdateReceiver);
+        //cationUtil.getInstance().unregisterReceiver();
         if (SettingsUtil.isAutoUploadEnabled(this))
             getGoogleApiClient().disconnect();
     }
@@ -1722,13 +1719,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         boolean alarms_enabled = sharedPreferences.getBoolean(getString(R.string.alarms_enabled), false);
         boolean use_ratio = sharedPreferences.getBoolean(getString(R.string.use_ratio), false);
         WheelData.getInstance().setUseRatio(use_ratio);
-
-        IWheelAdapter adapter = WheelData.getInstance().getAdapter();
-        if (adapter instanceof KingsongAdapter) {
-            boolean ks18l_scaler = sharedPreferences.getBoolean(getString(R.string.ks18l_scaler), false);
-            ((KingsongAdapter)adapter).set18Lkm(ks18l_scaler);
-        }
-
+        boolean ks18l_scaler = sharedPreferences.getBoolean(getString(R.string.ks18l_scaler), false);
+        WheelData.getInstance().set18Lkm(ks18l_scaler);
         boolean betterPercents = sharedPreferences.getBoolean(getString(R.string.use_better_percents), false);
         WheelData.getInstance().setBetterPercents(betterPercents);
         wheelView.setBetterPercent(betterPercents);
@@ -1741,14 +1733,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             mBluetoothLeService.setConnectionSounds(connectSound, beepPeriod);
         }
 
-        if (adapter instanceof GotwayAdapter) {
-            int gotway_voltage = Integer.parseInt(sharedPreferences.getString(getString(R.string.gotway_voltage), "1"));
-            ((GotwayAdapter)adapter).setVoltage(gotway_voltage);
+        int gotway_voltage = Integer.parseInt(sharedPreferences.getString(getString(R.string.gotway_voltage), "1"));
+        WheelData.getInstance().setGotwayVoltage(gotway_voltage);
 
-            int gotway_negative = Integer.parseInt(sharedPreferences.getString(getString(R.string.gotway_negative), "0"));
-            ((GotwayAdapter)adapter).setNegative(gotway_negative);
-        }
-
+        int gotway_negative = Integer.parseInt(sharedPreferences.getString(getString(R.string.gotway_negative), "0"));
+        WheelData.getInstance().setGotwayNegative(gotway_negative);
+        //boolean gotway_84v = sharedPreferences.getBoolean(getString(R.string.gotway_84v), false);
+        //WheelData.getInstance().setGotway84V(gotway_84v);
         WheelData.getInstance().setAlarmsEnabled(alarms_enabled);
 
         if (alarms_enabled) {
@@ -2026,4 +2017,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
         return frag;
     }
+
+
 }
