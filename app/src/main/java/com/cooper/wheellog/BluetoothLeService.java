@@ -39,6 +39,7 @@ public class BluetoothLeService extends Service {
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
     private Date mDisconnectTime;
+    private String mWakeLockTag = "WheelLog:myWakeLockTag";
 
     public static final int STATE_DISCONNECTED = 0;
     public static final int STATE_CONNECTING = 1;
@@ -172,7 +173,7 @@ public class BluetoothLeService extends Service {
                         wl.release();
                         wl = null;
                     }
-                    wl = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLockTag");
+                    wl = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mWakeLockTag);
                     wl.acquire();
                     playConnect();
 
@@ -643,7 +644,7 @@ public class BluetoothLeService extends Service {
 
     private void startBeepTimer(){
         //wl.acquire();
-        wl = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLockTag");
+        wl = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, mWakeLockTag);
         wl.acquire(300000);
         timerTicks = 0;
         TimerTask beepTimerTask = new TimerTask() {
