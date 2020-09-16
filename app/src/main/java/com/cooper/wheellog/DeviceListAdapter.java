@@ -1,6 +1,8 @@
 package com.cooper.wheellog;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +10,10 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.cooper.wheellog.utils.SettingsUtil;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -20,6 +26,7 @@ public class DeviceListAdapter extends BaseAdapter {
     static class ViewHolder {
         TextView deviceName;
         TextView deviceAddress;
+        TextView preferencesFound;
     }
 
     public DeviceListAdapter(AppCompatActivity appCompatActivity) {
@@ -71,6 +78,7 @@ public class DeviceListAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.deviceAddress = (TextView) view.findViewById(R.id.device_address);
             viewHolder.deviceName = (TextView) view.findViewById(R.id.device_name);
+            viewHolder.preferencesFound = (TextView) view.findViewById(R.id.preference_found);
             view.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) view.getTag();
@@ -83,6 +91,13 @@ public class DeviceListAdapter extends BaseAdapter {
         else
             viewHolder.deviceName.setText(R.string.unknown_device);
         viewHolder.deviceAddress.setText(device.getAddress());
+
+        if (SettingsUtil.getPreferencesFound(view.getContext(), device.getAddress())) {
+            viewHolder.preferencesFound.setText(R.string.pref_founded);
+            viewHolder.preferencesFound.setTextColor(Color.YELLOW);
+        } else {
+            viewHolder.preferencesFound.setVisibility(View.GONE);
+        }
 
         return view;
     }

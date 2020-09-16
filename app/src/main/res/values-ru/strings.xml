@@ -152,6 +152,7 @@
     <string name="current_on_dial_description">Рисовать ток на главной шкале вместо скорости</string>
     <string name="current_on_dial_title">Ток на главной шкале</string>
     <string name="devices">Устройства</string>
+    <string name="pref_founded">Уже подключалось</string>
     <string name="disable_phone_beep_title">Отключить звуковые оповещения</string>
     <string name="disable_phone_beep_description">Устройство не будет воспроизводить звуковые оповещения, но они будут передаваться на Pebble</string>
     <string name="disconnect">Отключить</string>

@@ -32,6 +32,7 @@
     <string name="search_for_wheel">Search for Wheel</string>
     <string name="scanning">Scanning…</string>
     <string name="devices">Devices</string>
+    <string name="pref_founded">Found preferences</string>
     <string name="mode_learn">Beginner</string>
     <string name="mode_play">Expert</string>
     <string name="mode_ride">Normal</string>

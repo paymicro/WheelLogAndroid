@@ -78,4 +78,20 @@ class MathUtilTest {
             assertThat(mixed[i + 1]).isEqualTo(reversed[i])
         }
     }
+
+    @Test
+    fun `reverse bytes`() {
+        // Arrange.
+        val original2 = 66000.toShort()
+        val original4 = 1234567980
+        val mixed = MathsUtil.reverseEvery2(MathsUtil.getBytes(original2) + MathsUtil.getBytes(original4))
+
+        // Act.
+        val expected2 = MathsUtil.getInt2R(mixed, 0)
+        val expected4 = MathsUtil.getInt4R(mixed, 2)
+
+        // Assert.
+        assertThat(expected2).isEqualTo(original2)
+        assertThat(expected4).isEqualTo(original4)
+    }
 }

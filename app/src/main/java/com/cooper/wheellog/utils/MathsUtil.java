@@ -29,6 +29,14 @@ public class MathsUtil {
         return ByteBuffer.wrap(arr, offset, 4).getInt();
     }
 
+    public static int getInt2R(byte[] arr, int offset) {
+        return ByteBuffer.wrap(reverseEvery2(arr, offset, 2), offset, 2).getShort();
+    }
+
+    public static long getInt4R(byte[] arr, int offset) {
+        return ByteBuffer.wrap(reverseEvery2(arr, offset, 4), offset, 4).getInt();
+    }
+
     @NotNull
     public static byte[] getBytes(short input) {
         return ByteBuffer.allocate(2).putShort(input).array();
@@ -41,6 +49,11 @@ public class MathsUtil {
 
     @NotNull
     public static byte[] reverseEvery2(@NotNull byte[] input) {
+        return reverseEvery2(input, 0, input.length);
+    }
+
+    @NotNull
+    public static byte[] reverseEvery2(@NotNull byte[] input, int start, int length) {
         byte[] result = Arrays.copyOf(input, input.length);
         for (int i = 0; i < result.length - 1; i += 2) {
             byte temp = result[i];

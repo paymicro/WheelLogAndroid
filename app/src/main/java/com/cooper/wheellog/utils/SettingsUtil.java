@@ -157,6 +157,13 @@ public class SettingsUtil {
         return getSharedPreferences(context).getString("wheel_adv_data_"+id, "");
     }
 
+    public static boolean getPreferencesFound(Context context, String suffix) {
+        if (suffix == null || suffix.equals("")) {
+            return false;
+        }
+        return !getDestinationPrefs(context, suffix).getAll().isEmpty();
+    }
+
     public static boolean savePreferencesTo(Context context, String suffix) {
         if (suffix == null || suffix.equals("")) {
             return false;

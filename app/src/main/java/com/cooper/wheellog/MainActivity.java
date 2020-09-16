@@ -325,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     if (intent.hasExtra(Constants.INTENT_EXTRA_WHEEL_SETTINGS)) {
                         setWheelPreferences();
                     }
+                    SettingsUtil.savePreferencesTo(getBaseContext(), SettingsUtil.getLastAddress(getBaseContext()));
                     updateScreen(intent.hasExtra(Constants.INTENT_EXTRA_GRAPH_UPDATE_AVILABLE));
                     break;
                 case Constants.ACTION_PEBBLE_SERVICE_TOGGLED:
@@ -347,7 +348,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     break;
                 case Constants.ACTION_PREFERENCE_CHANGED:
                     loadPreferences();
-                    // save to specific pref depending on MAC
                     SettingsUtil.savePreferencesTo(getBaseContext(), SettingsUtil.getLastAddress(getBaseContext()));
                     break;
                 case Constants.ACTION_PREFERENCE_RESET:
