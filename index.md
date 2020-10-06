@@ -1,6 +1,6 @@
-# Welcome to Wheellog for Android
+# Wheellog for Android
 
-# electro.club
+## electro.club
 
 В последних версиях появилась возможность загружать треки на сайт [electro.club](https://electro.club).
 Для этого нужно...
@@ -25,9 +25,9 @@
 ![](edit-mac.jpg)
 ![](change-mac.jpg)
 
-___
+______
 
-# Известные проблемы
+## Известные проблемы
 
 - GPS не записываеся при выключеном экране
 1. Проверьте что геопозиция включена в любом режиме
