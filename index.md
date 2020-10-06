@@ -1,37 +1,24 @@
-## Welcome to GitHub Pages
+# Welcome to Wheellog for Android
 
-You can use the [editor on GitHub](https://github.com/paymicro/WheelLogAndroid/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+## electro.club
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+В последних версиях появилась возможность загружать треки на сайт [electro.club](https://electro.club).
+Для этого нужно...
 
-### Markdown
+- зарешистрироваться на сайте [electro.club](https://electro.club)
+- скачать бета версию Wheellog из [телеграмм канала](https://t.me/wheellog)
+- в настройках перейти в логирование
+- установить галочку загрузки в electro.club
+- ввести логин и пароль
+- проверить включен GPS, без него треки не принимаются 
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+При завершении записи трека или при выходе из приложения трек будет загружен в [electro.club](https://electro.club).
+Искать его можно в разделе карты в своем профиле. Чтобы он сразу загружался к конкретному транспорту, необходимо на [сайте](https://electro.club) установить для него MAC-адрес.
 
-```markdown
-Syntax highlighted code block
+## Известные проблемы
 
-# Header 1
-## Header 2
-### Header 3
+- GPS не записываеся при выключеном экране
+1. Проверьте что геопозиция включена в любом режиме
+2. Если у вас телефон производства **Xiaomi** то необходимо отключить контроль активности приложения. Долгое нажатие на иконку - `О приложении` - `Контроль активности` - `Нет ограничений`
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/paymicro/WheelLogAndroid/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+- TODO
