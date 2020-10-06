@@ -1,5 +1,3 @@
-# Wheellog for Android
-
 ## electro.club
 
 В последних версиях появилась возможность загружать треки на сайт [electro.club](https://electro.club).
