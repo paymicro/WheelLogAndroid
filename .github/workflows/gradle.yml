@@ -24,3 +24,7 @@ jobs:
       run: ./gradlew build
     - name: Android Build
       uses: vgaidarji/android-github-actions-build@v1.0.1
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Package
+        path: build/libs
